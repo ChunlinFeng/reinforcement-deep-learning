@@ -1,6 +1,7 @@
 Project Proposal
-Reinforcement Deep Learning in flappy bird
+Reinforcement Deep Learning in Flappy Bird
 Group members: Chunlin Feng & Ting Ying
 
 
 We have learned Q Learning in the class and it seems that Q Learning algorithm can be very helpful in playing game. We decide to train an agent to play Flappy Bird. First we will extract information from frame with opencv and then train the agent with Q Learning algorithm.
+We have found a library which implement flappy bird on pygame and we plan to use TensorFlow to train the model.
