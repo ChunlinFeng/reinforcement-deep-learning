@@ -3,5 +3,5 @@ Reinforcement Deep Learning in Flappy Bird
 Group members: Chunlin Feng & Ting Ying
 
 
-We have learned Q Learning in the class and it seems that Q Learning algorithm can be very helpful in playing game. We decide to train an agent to play Flappy Bird. First we will extract information from frame with opencv and then train the agent with Q Learning algorithm.
-We have found a library which implement flappy bird on pygame and we plan to use TensorFlow to train the model.
+We have learned Q Learning in the class and it seems that Q Learning algorithm can be very helpful in playing game. We decide to train an agent to play Flappy Bird. The rule is to fly between columns of pipes without hitting them. With time passed by, the reword increase if not hitting the pipe and decrease to -∞ if the bird hit the pipe. At a certain state, the bird only has two choice: jump or not. Since the game can be infinite, we think it is quite suitable for Q Learning. 
+First we will extract states from frame with opencv and then train the agent with Q Learning algorithm. We have found a library which implement flappy bird on pygame and we plan to use TensorFlow to train the model. TensorFlow is a free and open-source software library for dataflow programming across a range of tasks. It is easy to use and easy to debug as well. The desirable result is the agent can pass the every pipe. We plan to fix the speed of the bird at first, if  it works well, we may increase the speed. 
