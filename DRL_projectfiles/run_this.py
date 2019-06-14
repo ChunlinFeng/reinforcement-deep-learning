@@ -44,17 +44,20 @@ def run_bird():
             observation_ = nextObservation
 
             RL.store_transition(observation, action[1], reward, observation_)
-
-            if (step > 2000) and (step % 5 == 0):
+            if (step > 50) and (step % 100 == 0):
                 RL.learn()
+
+            if (step > 50) and (step % 1000 == 0):
+                print('Loss ', RL.get_cost())
 
             # swap observation
             observation = observation_
-
             # break while loop when end of this episode
             if done:
                 break
             step += 1
+
+            #if LastTime > 50: return(LastTime);
 
     # end of game
     print('game over')
@@ -65,14 +68,14 @@ if __name__ == "__main__":
     # bird game
     env = game.GameState()  # define the game environment -> jump to game
     actions = 2
-    features = 6
+    features = 5
     RL = DeepQNetwork(actions, features,
-                      learning_rate=0.01,
+                      learning_rate= 10**-2,
                       reward_decay=1.0,
                       e_greedy=0.6,
-                      replace_target_iter=2000,
-                      memory_size=10000,
-                      # output_graph=True
+                      replace_target_iter= 200,
+                      memory_size=50,
+                      output_graph=True
                       )
     time.sleep(0.5)
     run_bird()

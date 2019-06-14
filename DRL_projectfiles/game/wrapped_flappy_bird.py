@@ -7,7 +7,7 @@ import pygame.surfarray as surfarray
 from pygame.locals import *
 from itertools import cycle
 
-FPS = 300000
+FPS = 30000
 SCREENWIDTH  = 288
 SCREENHEIGHT = 512
 
@@ -60,8 +60,8 @@ class GameState:
     def frame_step(self, input_actions):
         pygame.event.pump()
 
-        reward = 0.1
-        reward = 1.0
+        reward = 1
+
         terminal = False
 
         if sum(input_actions) != 1:
@@ -82,7 +82,7 @@ class GameState:
             if pipeMidPos <= playerMidPos < pipeMidPos + 4:
                 self.score += 1
                 #SOUNDS['point'].play()
-                reward = 500
+                reward = 1
 
         # playerIndex basex change
         if (self.loopIter + 1) % 3 == 0:
@@ -125,7 +125,7 @@ class GameState:
             terminal = True
             #reward = - abs(self.playery - self.lowerPipes[0]['y']) /40.0
             self.__init__()
-            reward = -10
+            reward = -1000
 
 
         # draw sprites
@@ -137,7 +137,7 @@ class GameState:
 
         SCREEN.blit(IMAGES['base'], (self.basex, BASEY))
         # print score so player overlaps the score
-        # showScore(self.score)
+        showScore(self.score)
         SCREEN.blit(IMAGES['player'][self.playerIndex],
                     (self.playerx, self.playery))
 
@@ -148,8 +148,10 @@ class GameState:
         #print('index = ',self.playerIndex,'playerx = ',self.playerx, 'playery = ',self.playery ,'lowerpipes =', self.lowerPipes[0]['x'])
         #print self.upperPipes[0]['y'] + PIPE_HEIGHT - int(BASEY * 0.2)
         #return image_data, reward, terminal
-
-        info = np.array([self.playery,self.playerAccY, self.playerFlapAcc, self.lowerPipes[0]['x'],self.lowerPipes[0]['y'],self.upperPipes[0]['y']])
+        if len(self.lowerPipes) == 2:
+            info = np.array([self.playery,self.playerVelY , self.lowerPipes[0]['x'],self.lowerPipes[0]['y'],self.upperPipes[0]['y']])
+        else:
+            info = np.array([self.playery, self.playerVelY, self.lowerPipes[1]['x'], self.lowerPipes[1]['y'],self.upperPipes[1]['y']])
         return info, reward, terminal
 
 def getRandomPipe():
@@ -157,15 +159,15 @@ def getRandomPipe():
     # y of gap between upper and lower pipe
     gapYs = [20, 30, 40, 50, 60, 70, 80, 90]
     index = random.randint(0, len(gapYs)-1)
-    #gapY = gapYs[index]
-    gapY = gapYs[0]
+    gapY = gapYs[index]
+    #gapY = gapYs[0]
 
     gapY += int(BASEY * 0.2)
     pipeX = SCREENWIDTH + 10
 
     return [
-        {'x': pipeX, 'y': gapY - PIPE_HEIGHT},  # upper pipe
-        {'x': pipeX, 'y': gapY + PIPEGAPSIZE},  # lower pipe
+        {'x': pipeX, 'y': gapY - PIPE_HEIGHT *1},  # upper pipe
+        {'x': pipeX, 'y': gapY + PIPEGAPSIZE *1},  # lower pipe
     ]
 
 

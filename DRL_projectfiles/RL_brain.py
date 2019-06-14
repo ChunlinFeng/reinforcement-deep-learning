@@ -29,20 +29,20 @@ class DeepQNetwork:
             e_greedy=0.9,
             replace_target_iter=300,
             memory_size=500,
-            batch_size=32,
-            e_greedy_increment=0.0001,
+            batch_size=128,
+            e_greedy_increment=0.004,
             output_graph=False,
     ):
         self.n_actions = n_actions
         self.n_features = n_features
         self.lr = learning_rate
         self.gamma = reward_decay
-        self.epsilon_max = 0.9
+        self.epsilon_max = 0.95
         self.replace_target_iter = replace_target_iter
         self.memory_size = memory_size
         self.batch_size = batch_size
         self.epsilon_increment = e_greedy_increment
-        self.epsilon = 0.7 if e_greedy_increment is not None else self.epsilon_max
+        self.epsilon = 0.2 if e_greedy_increment is not None else self.epsilon_max
 
         # total learning step
         self.learn_step_counter = 0
@@ -83,8 +83,8 @@ class DeepQNetwork:
 
         with tf.variable_scope('eval_net'):
             # c_names(collections_names) are the collections to store variables
-            c_names, n_l1, n_h0, n_h1, w_initializer, b_initializer = \
-                ['eval_net_params', tf.GraphKeys.GLOBAL_VARIABLES], 20, 20, 20, \
+            c_names, n_l1, n_h0, n_h1, n_h2, w_initializer, b_initializer = \
+                ['eval_net_params', tf.GraphKeys.GLOBAL_VARIABLES], 500, 500, 500, 500, \
                 tf.random_normal_initializer(0., 0.3), tf.constant_initializer(0.1)  # config of layers
 
             # first layer. collections is used later when assign to target net
@@ -105,11 +105,17 @@ class DeepQNetwork:
                 b4 = tf.get_variable('b3', [1, n_h1], initializer=b_initializer, collections=c_names)
                 l4 = tf.nn.relu(tf.matmul(l3, w4) + b4)
 
+            # hidden layer 2
+            with tf.variable_scope('l5'):
+                w5 = tf.get_variable('w5', [n_h1, n_h2], initializer=w_initializer, collections=c_names)
+                b5 = tf.get_variable('b5', [1, n_h2], initializer=b_initializer, collections=c_names)
+                l5 = tf.nn.relu(tf.matmul(l4, w5) + b5)
+
             # second layer. collections is used later when assign to target net
             with tf.variable_scope('l2'):
-                w2 = tf.get_variable('w2', [n_h1, self.n_actions], initializer=w_initializer, collections=c_names)
+                w2 = tf.get_variable('w2', [n_h2, self.n_actions], initializer=w_initializer, collections=c_names)
                 b2 = tf.get_variable('b2', [1, self.n_actions], initializer=b_initializer, collections=c_names)
-                self.q_eval = tf.matmul(l4, w2) + b2
+                self.q_eval = tf.matmul(l5, w2) + b2
 
         with tf.variable_scope('loss'):
             self.loss = tf.reduce_mean(tf.squared_difference(self.q_target, self.q_eval))
@@ -140,11 +146,17 @@ class DeepQNetwork:
                 b4 = tf.get_variable('b3', [1, n_h1], initializer=b_initializer, collections=c_names)
                 l4 = tf.nn.relu(tf.matmul(l3, w4) + b4)
 
+            # hidden layer 2
+            with tf.variable_scope('l5'):
+                w5 = tf.get_variable('w5', [n_h1, n_h2], initializer=w_initializer, collections=c_names)
+                b5 = tf.get_variable('b5', [1, n_h2], initializer=b_initializer, collections=c_names)
+                l5 = tf.nn.relu(tf.matmul(l4, w5) + b5)
+
             # second layer. collections is used later when assign to target net
             with tf.variable_scope('l2'):
-                w2 = tf.get_variable('w2', [n_h1, self.n_actions], initializer=w_initializer, collections=c_names)
+                w2 = tf.get_variable('w2', [n_h2, self.n_actions], initializer=w_initializer, collections=c_names)
                 b2 = tf.get_variable('b2', [1, self.n_actions], initializer=b_initializer, collections=c_names)
-                self.q_next = tf.matmul(l4, w2) + b2
+                self.q_next = tf.matmul(l5, w2) + b2
 
     def store_transition(self, s, a, r, s_):
         if not hasattr(self, 'memory_counter'):
@@ -240,7 +252,7 @@ class DeepQNetwork:
 
         #print(self.epsilon)
         # save network every 100000 iteration
-        if self.learn_step_counter % 50000 == 0:
+        if self.learn_step_counter % 4100 == 0:
             self.saver.save(self.sess, 'saved_networks/' + 'network' + '-dqn', global_step=self.learn_step_counter)
 
 
@@ -251,5 +263,7 @@ class DeepQNetwork:
         plt.xlabel('training steps')
         plt.show()
 
+    def get_cost(self):
+        return self.cost_his[-1]
 
 
